@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="elm"></div>
+        <script src="/elm.js"></script>
+        <script>
+            const app = window.__TAURI__.app;
+            const clipboard = window.__TAURI__.clipboard;
+        </script>
+
+        <script>
+            var elm = Elm.Main.init({
+                node: document.getElementById("elm"),
+            });
+
+            const HEAVY_PROCESS_SIMULATION_TIME = 5000;
+
+            elm.ports.setClipboard.subscribe((string) => {
+                console.log(`Setting clipboard to ${string}`);
+
+                setTimeout(() => {
+                    clipboard.writeText(string)
+                        .then(() => {
+                                elm.ports.clipboardMessageReceiver.send("Clipboard set!")
+                                console.log("Done, try to paste it...");
+                        })
+                        .catch((error) => {
+                            elm.ports.clipboardMessageReceiver.send(`${error}`)
+                            console.log("Oops, something went wrong");
+                        })
+                }, HEAVY_PROCESS_SIMULATION_TIME);
+            });
+
+            elm.ports.sendStringToTauriApp.subscribe((string) => {
+                console.log("Getting string...");
+                console.log(string);
+                console.log("Done");
+            });
+        </script>
+    </body>
+</html>
