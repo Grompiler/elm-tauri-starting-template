@@ -13,7 +13,10 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true
+      "all": true,
+      "fs": {
+        "scope": ["$RUNTIME"]
+      }
     },
     "bundle": {
       "active": true,

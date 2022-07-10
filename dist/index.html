@@ -8,6 +8,7 @@
         <script>
             const app = window.__TAURI__.app;
             const clipboard = window.__TAURI__.clipboard;
+            const fs = window.__TAURI__.fs
         </script>
 
         <script>
@@ -18,16 +19,23 @@
             elm.ports.setClipboard.subscribe((string) => {
                 clipboard.writeText(string)
                     .then(() => {
-                            elm.ports.clipboardMessageReceiver.send("Clipboard set!")
+                        elm.ports.clipboardMessageReceiver.send("Clipboard set!");
                     })
                     .catch((error) => {
-                        elm.ports.clipboardMessageReceiver.send(`${error}`)
+                        elm.ports.gotErrorMessage.send(`${error}`);
                     })
             });
 
-            elm.ports.sendStringToTauriApp.subscribe((string) => {
-                console.log(string);
+            elm.ports.readTextFile.subscribe((filename) => {
+                fs.readTextFile(filename, { dir: fs.BaseDirectory.App })
+                    .then((content) => {
+                        elm.ports.gotTextFile.send(content);
+                    })
+                    .catch((error) => {
+                        elm.ports.gotErrorMessage.send(error);
+                    })
             });
+
         </script>
     </body>
 </html>

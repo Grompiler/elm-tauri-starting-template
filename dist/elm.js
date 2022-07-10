@@ -5163,19 +5163,34 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		{clipboardMessage: '', counter: 0},
+		{clipboardMessage: '', counter: 0, errorMessage: '', textFile: ''},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$GotClipboardMessage = function (a) {
 	return {$: 'GotClipboardMessage', a: a};
 };
+var $author$project$Main$GotErrorMessage = function (a) {
+	return {$: 'GotErrorMessage', a: a};
+};
+var $author$project$Main$GotTextFile = function (a) {
+	return {$: 'GotTextFile', a: a};
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$clipboardMessageReceiver = _Platform_incomingPort('clipboardMessageReceiver', $elm$json$Json$Decode$string);
+var $author$project$Main$gotErrorMessage = _Platform_incomingPort('gotErrorMessage', $elm$json$Json$Decode$string);
+var $author$project$Main$gotTextFile = _Platform_incomingPort('gotTextFile', $elm$json$Json$Decode$string);
 var $author$project$Main$subscriptions = function (model) {
-	return $author$project$Main$clipboardMessageReceiver($author$project$Main$GotClipboardMessage);
+	return $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				$author$project$Main$gotTextFile($author$project$Main$GotTextFile),
+				$author$project$Main$clipboardMessageReceiver($author$project$Main$GotClipboardMessage),
+				$author$project$Main$gotErrorMessage($author$project$Main$GotErrorMessage)
+			]));
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
-var $author$project$Main$sendStringToTauriApp = _Platform_outgoingPort('sendStringToTauriApp', $elm$json$Json$Encode$string);
+var $author$project$Main$readTextFile = _Platform_outgoingPort('readTextFile', $elm$json$Json$Encode$string);
 var $author$project$Main$setClipboard = _Platform_outgoingPort('setClipboard', $elm$json$Json$Encode$string);
 var $author$project$Main$update = F2(
 	function (msg, model) {
@@ -5192,29 +5207,43 @@ var $author$project$Main$update = F2(
 						model,
 						{counter: model.counter - 1}),
 					$elm$core$Platform$Cmd$none);
-			case 'SendString':
-				var string = msg.a;
-				return _Utils_Tuple2(
-					model,
-					$author$project$Main$sendStringToTauriApp(string));
 			case 'SetClipboard':
 				var string = msg.a;
 				return _Utils_Tuple2(
 					model,
 					$author$project$Main$setClipboard(string));
-			default:
+			case 'GotClipboardMessage':
 				var string = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{clipboardMessage: string}),
 					$elm$core$Platform$Cmd$none);
+			case 'GotErrorMessage':
+				var string = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{errorMessage: string}),
+					$elm$core$Platform$Cmd$none);
+			case 'ReadTextFile':
+				var string = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Main$readTextFile(string));
+			default:
+				var string = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{textFile: string}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$Decrement = {$: 'Decrement'};
 var $author$project$Main$Increment = {$: 'Increment'};
-var $author$project$Main$SendString = function (a) {
-	return {$: 'SendString', a: a};
+var $author$project$Main$ReadTextFile = function (a) {
+	return {$: 'ReadTextFile', a: a};
 };
 var $author$project$Main$SetClipboard = function (a) {
 	return {$: 'SetClipboard', a: a};
@@ -5279,17 +5308,6 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Events$onClick(
-						$author$project$Main$SendString('Hello from elm'))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Say hello')
-					])),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Events$onClick(
 						$author$project$Main$SetClipboard('Tauri is awesome!'))
 					]),
 				_List_fromArray(
@@ -5297,11 +5315,36 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$text('Set clipboard')
 					])),
 				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$Main$ReadTextFile('index.html'))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Read index.html')
+					])),
+				A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
 						$elm$html$Html$text(model.clipboardMessage)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(model.errorMessage)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(model.textFile)
 					]))
 			]));
 };
